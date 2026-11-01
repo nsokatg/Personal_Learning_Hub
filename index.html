@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Learning Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 落ち着いた洗練された配色（スレート＆インディゴ・トーン） */
+        :root {
+            --hub-bg: #0f172a;        /* スレート900 (深いナイトモード調の落ち着いたヘッダー) */
+            --hub-card: #1e293b;      /* スレート800 */
+            --accent-sub: #334155;    /* スレート700 */
+        }
+        .tab-active { 
+            background-color: #ffffff; 
+            color: #0f172a; 
+            font-weight: 600; 
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1); 
+        }
+        .tab-inactive { 
+            color: #94a3b8; /* スレート400 (控えめな文字色) */
+        }
+        .tab-inactive:hover { 
+            background-color: #334155; 
+            color: #f8fafc; 
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 h-screen flex flex-col overflow-hidden">
+
+    <!-- 🌐 統合ポータル ヘッダー & 落ち着いたループナビゲーション -->
+    <header class="bg-slate-900 text-white px-4 py-2.5 flex flex-col sm:flex-row justify-between items-center shadow-sm shrink-0 gap-2 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+            <span class="text-lg">📚</span>
+            <h1 class="font-bold text-sm md:text-base tracking-wide text-slate-100">Personal Learning Hub</h1>
+        </div>
+        
+        <!-- 🔄 3つのツールを行き来するタブ（落ち着いたスレート調） -->
+        <nav class="flex bg-slate-800 p-1 rounded-lg gap-1 text-xs border border-slate-700/60">
+            <button onclick="switchPortalTab('closeup')" id="nav-closeup" class="px-3 py-1.5 rounded-md transition tab-active">
+                🌅 CloseupToday (起点)
+            </button>
+            <button onclick="switchPortalTab('deepnote')" id="nav-deepnote" class="px-3 py-1.5 rounded-md transition tab-inactive">
+                📖 深堀ノート
+            </button>
+            <button onclick="switchPortalTab('digest')" id="nav-digest" class="px-3 py-1.5 rounded-md transition tab-inactive">
+                🗂️ ナレッジダイジェスト
+            </button>
+        </nav>
+    </header>
+
+    <!-- 📌 データ連携・ジャンプの共通アクションバー（マットで上品なトーン） -->
+    <div id="action-bar" class="bg-white border-b border-slate-200 px-4 py-2 flex justify-between items-center text-xs shrink-0 shadow-2xs">
+        <div class="flex items-center gap-2 text-slate-600 font-medium" id="current-status-text">
+            <span>📍 現在の表示: 🌅 CloseupToday</span>
+        </div>
+        <div class="flex gap-2" id="quick-action-buttons">
+            <!-- 動的にアクションボタンが切り替わります -->
+        </div>
+    </div>
+
+    <!-- メインフレーム領域 -->
+    <main class="flex-1 relative overflow-hidden flex flex-col">
+        <iframe id="frame-closeup" src="https://nsokatg.github.io/CloseupToday/" class="w-full h-full border-none"></iframe>
+        <iframe id="frame-deepnote" src="https://nsokatg.github.io/personal_research_learning_note/" class="w-full h-full border-none hidden"></iframe>
+        <iframe id="frame-digest" src="https://nsokatg.github.io/knowledge_store/" class="w-full h-full border-none hidden"></iframe>
+    </main>
+
+    <script>
+        let currentTab = 'closeup';
+
+        function switchPortalTab(tabName) {
+            currentTab = tabName;
+            const frames = {
+                closeup: document.getElementById('frame-closeup'),
+                deepnote: document.getElementById('frame-deepnote'),
+                digest: document.getElementById('frame-digest')
+            };
+            const navs = {
+                closeup: document.getElementById('nav-closeup'),
+                deepnote: document.getElementById('nav-deepnote'),
+                digest: document.getElementById('nav-digest')
+            };
+            const statusText = document.getElementById('current-status-text');
+            const actionBtns = document.getElementById('quick-action-buttons');
+
+            Object.keys(frames).forEach(key => {
+                if (key === tabName) {
+                    frames[key].classList.remove('hidden');
+                    navs[key].className = "px-3 py-1.5 rounded-md transition tab-active";
+                } else {
+                    frames[key].classList.add('hidden');
+                    navs[key].className = "px-3 py-1.5 rounded-md transition tab-inactive";
+                }
+            });
+
+            // 落ち着いたカラーボタン（slateやzinc系統）に変更
+            if (tabName === 'closeup') {
+                statusText.innerHTML = '<span>📍 現在の表示: 🌅 CloseupToday (起点)</span>';
+                actionBtns.innerHTML = `
+                    <button onclick="sendCloseupToDeepDive()" class="bg-slate-800 hover:bg-slate-900 text-white px-3 py-1 rounded-md font-medium transition flex items-center gap-1 shadow-2xs">
+                        <span>🚀 今日のテーマを「深掘りノート」へ送る</span>
+                    </button>
+                    <button onclick="sendCloseupToDigest()" class="bg-slate-700 hover:bg-slate-800 text-white px-3 py-1 rounded-md font-medium transition flex items-center gap-1 shadow-2xs">
+                        <span>📥 今日のテーマを「ナレッジダイジェスト」にストック</span>
+                    </button>
+                `;
+            } else if (tabName === 'deepnote') {
+                statusText.innerHTML = '<span>📍 現在の表示: 📖 深掘りノート</span>';
+                actionBtns.innerHTML = `
+                    <button onclick="sendDeepDiveToDigest()" class="bg-slate-800 hover:bg-slate-900 text-white px-3 py-1 rounded-md font-medium transition flex items-center gap-1 shadow-2xs">
+                        <span>🗂️ 生成したノートを「ナレッジ倉庫」へ保存＆ジャンプ</span>
+                    </button>
+                `;
+            } else if (tabName === 'digest') {
+                statusText.innerHTML = '<span>📍 現在の表示: 🗂️ ナレッジダイジェスト (倉庫)</span>';
+                actionBtns.innerHTML = `
+                    <button onclick="switchPortalTab('closeup')" class="bg-slate-800 hover:bg-slate-900 text-white px-3 py-1 rounded-md font-medium transition flex items-center gap-1 shadow-2xs">
+                        <span>🌅 今日の起点 (CloseupToday) に戻る</span>
+                    </button>
+                `;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            switchPortalTab('closeup');
+        });
+
+        function sendCloseupToDeepDive() {
+            try {
+                const iframe = document.getElementById('frame-closeup');
+                const titleText = iframe.contentWindow.document.getElementById('title-text')?.innerText || '';
+                
+                if (!titleText || titleText === 'テーマ名') {
+                    alert('CloseupTodayのデータが読み込まれていないか、テーマが取得できませんでした。');
+                    return;
+                }
+
+                const deepIframe = document.getElementById('frame-deepnote');
+                const themeInput = deepIframe.contentWindow.document.getElementById('themeInput');
+                if (themeInput) {
+                    themeInput.value = titleText;
+                }
+
+                alert(`「${titleText}」を深掘りノートにセットしました！`);
+                switchPortalTab('deepnote');
+            } catch (e) {
+                console.error(e);
+                alert('データ連携中にエラーが発生しました。');
+            }
+        }
+
+        function sendDeepDiveToDigest() {
+            try {
+                const deepIframe = document.getElementById('frame-deepnote');
+                const doc = deepIframe.contentWindow.document;
+                
+                const title = doc.getElementById('resultTitle')?.innerText.replace(/^テーマ:\s*/, '').replace(/\s*\(.*\)$/, '') || '無題の学習ノート';
+                const noteHtml = doc.getElementById('noteContent')?.innerText || '';
+
+                if (!noteHtml) {
+                    alert('保存対象のノートが生成されていません。');
+                    return;
+                }
+
+                const newItem = {
+                    id: "item_" + Date.now(),
+                    title: title,
+                    createdAt: new Date().toISOString().split('T')[0],
+                    seriesName: "Personal Deep-Dive",
+                    prevId: null,
+                    nextId: null,
+                    rawInput: noteHtml,
+                    digest: {
+                        summary: [ "深掘りノートからの自動インポート" ],
+                        keywords: [],
+                        rawItems: [{ label: "生成ノート全文", content: noteHtml }],
+                        flashcards: []
+                    }
+                };
+
+                const existingData = localStorage.getItem('knowledge_store');
+                let store = { version: "1.0", items: [] };
+                if (existingData) {
+                    try { store = JSON.parse(existingData); } catch(err){}
+                }
+
+                store.items.unshift(newItem);
+                localStorage.setItem('knowledge_store', JSON.stringify(store));
+
+                const digestIframe = document.getElementById('frame-digest');
+                if (digestIframe.contentWindow.loadFromLocalStorage && digestIframe.contentWindow.renderList) {
+                    digestIframe.contentWindow.loadFromLocalStorage();
+                    digestIframe.contentWindow.renderList();
+                    if (digestIframe.contentWindow.selectItem) {
+                        digestIframe.contentWindow.selectItem(newItem.id);
+                    }
+                }
+
+                alert(`「${title}」をナレッジ倉庫に保存しました！`);
+                switchPortalTab('digest');
+
+            } catch (e) {
+                console.error(e);
+                alert('保存中にエラーが発生しました。');
+            }
+        }
+
+        function sendCloseupToDigest() {
+            try {
+                const iframe = document.getElementById('frame-closeup');
+                const doc = iframe.contentWindow.document;
+
+                const title = doc.getElementById('title-text')?.innerText || '本日のトピック';
+                const category = doc.getElementById('category-text')?.innerText || '教養';
+                const overview = doc.getElementById('text-overview')?.innerText || '';
+
+                if (!overview) {
+                    alert('CloseupTodayのデータが読み込まれていません。');
+                    return;
+                }
+
+                const newItem = {
+                    id: "item_" + Date.now(),
+                    title: title,
+                    createdAt: new Date().toISOString().split('T')[0],
+                    seriesName: `CloseupToday (${category})`,
+                    prevId: null,
+                    nextId: null,
+                    rawInput: overview,
+                    digest: {
+                        summary: [ overview.substring(0, 100) + "..." ],
+                        keywords: [],
+                        rawItems: [{ label: "概要", content: overview }],
+                        flashcards: []
+                    }
+                };
+
+                const existingData = localStorage.getItem('knowledge_store');
+                let store = { version: "1.0", items: [] };
+                if (existingData) {
+                    try { store = JSON.parse(existingData); } catch(err){}
+                }
+
+                store.items.unshift(newItem);
+                localStorage.setItem('knowledge_store', JSON.stringify(store));
+
+                const digestIframe = document.getElementById('frame-digest');
+                if (digestIframe.contentWindow.loadFromLocalStorage && digestIframe.contentWindow.renderList) {
+                    digestIframe.contentWindow.loadFromLocalStorage();
+                    digestIframe.contentWindow.renderList();
+                }
+
+                alert(`「${title}」をナレッジ倉庫に保存しました！`);
+                switchPortalTab('digest');
+            } catch(e) {
+                console.error(e);
+                alert('保存処理に失敗しました。');
+            }
+        }
+    </script>
+</body>
+</html>
