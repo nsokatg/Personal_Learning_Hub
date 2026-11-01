@@ -45,7 +45,7 @@
                 📖 深堀ノート
             </button>
             <button onclick="switchPortalTab('digest')" id="nav-digest" class="px-3 py-1.5 rounded-md transition tab-inactive">
-                🗂️ ナレッジダイジェスト
+                🗂️ ナレッジストア
             </button>
         </nav>
     </header>
@@ -103,18 +103,18 @@
                         <span>🚀 今日のテーマを「深掘りノート」へ送る</span>
                     </button>
                     <button onclick="sendCloseupToDigest()" class="bg-slate-700 hover:bg-slate-800 text-white px-3 py-1 rounded-md font-medium transition flex items-center gap-1 shadow-2xs">
-                        <span>📥 今日のテーマを「ナレッジダイジェスト」にストック</span>
+                        <span>📥 今日のテーマを「ナレッジストア」にストック</span>
                     </button>
                 `;
             } else if (tabName === 'deepnote') {
                 statusText.innerHTML = '<span>📍 現在の表示: 📖 深掘りノート</span>';
                 actionBtns.innerHTML = `
                     <button onclick="sendDeepDiveToDigest()" class="bg-slate-800 hover:bg-slate-900 text-white px-3 py-1 rounded-md font-medium transition flex items-center gap-1 shadow-2xs">
-                        <span>🗂️ 生成したノートを「ナレッジ倉庫」へ保存＆ジャンプ</span>
+                        <span>🗂️ 生成したノートを「ナレッジストア」へ保存＆ジャンプ</span>
                     </button>
                 `;
             } else if (tabName === 'digest') {
-                statusText.innerHTML = '<span>📍 現在の表示: 🗂️ ナレッジダイジェスト (倉庫)</span>';
+                statusText.innerHTML = '<span>📍 現在の表示: 🗂️ ナレッジストア</span>';
                 actionBtns.innerHTML = `
                     <button onclick="switchPortalTab('closeup')" class="bg-slate-800 hover:bg-slate-900 text-white px-3 py-1 rounded-md font-medium transition flex items-center gap-1 shadow-2xs">
                         <span>🌅 今日の起点 (CloseupToday) に戻る</span>
@@ -198,7 +198,7 @@
                     }
                 }
 
-                alert(`「${title}」をナレッジ倉庫に保存しました！`);
+                alert(`「${title}」をナレッジストアに保存しました！`);
                 switchPortalTab('digest');
 
             } catch (e) {
@@ -252,7 +252,7 @@
                     digestIframe.contentWindow.renderList();
                 }
 
-                alert(`「${title}」をナレッジ倉庫に保存しました！`);
+                alert(`「${title}」をナレッジストアに保存しました！`);
                 switchPortalTab('digest');
             } catch(e) {
                 console.error(e);
